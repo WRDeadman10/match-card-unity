@@ -19,6 +19,7 @@ namespace VectorSandboxLab.MemoryGame
         private GameLayoutView layoutView;
         private Coroutine resolveRoutine;
         private BoardLayoutPreset activeLayout;
+        private bool hasCompletedGame;
 
         private void Start()
         {
@@ -131,6 +132,17 @@ namespace VectorSandboxLab.MemoryGame
                 {
                     layoutView.StatusText.text = $"Match found: {firstCard.Symbol} (+{gainedPoints})";
                 }
+
+                if (!hasCompletedGame && IsBoardComplete())
+                {
+                    hasCompletedGame = true;
+                    audioManager?.PlayGameOver();
+
+                    if (layoutView?.StatusText != null)
+                    {
+                        layoutView.StatusText.text = $"Game complete. Final score: {scoreManager.Score}";
+                    }
+                }
             }
             else
             {
@@ -229,6 +241,19 @@ namespace VectorSandboxLab.MemoryGame
                 pairIds = pairIds,
                 symbols = symbols
             });
+        }
+
+        private bool IsBoardComplete()
+        {
+            for (var index = 0; index < boardManager.ActiveCards.Count; index++)
+            {
+                if (!boardManager.ActiveCards[index].IsMatched)
+                {
+                    return false;
+                }
+            }
+
+            return boardManager.ActiveCards.Count > 0;
         }
     }
 }
