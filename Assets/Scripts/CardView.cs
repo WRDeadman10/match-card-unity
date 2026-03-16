@@ -1,4 +1,5 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -12,8 +13,8 @@ namespace VectorSandboxLab.MemoryGame
         [SerializeField] private Image backgroundImage;
         [SerializeField] private GameObject frontFace;
         [SerializeField] private GameObject backFace;
-        [SerializeField] private Text frontLabel;
-        [SerializeField] private Text backLabel;
+        [SerializeField] private TextMeshProUGUI frontLabel;
+        [SerializeField] private TextMeshProUGUI backLabel;
         [SerializeField] private float flipDuration = 0.14f;
 
         private Coroutine flipRoutine;

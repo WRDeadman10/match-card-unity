@@ -1,18 +1,19 @@
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace VectorSandboxLab.MemoryGame
 {
     public sealed class GameLayoutView : MonoBehaviour
     {
         [SerializeField] private RectTransform boardArea;
-        [SerializeField] private Text titleText;
-        [SerializeField] private Text scoreText;
-        [SerializeField] private Text statusText;
+        [SerializeField] private TextMeshProUGUI titleText;
+        [SerializeField] private TextMeshProUGUI scoreText;
+        [SerializeField] private TextMeshProUGUI statusText;
 
+        public RectTransform Root => (RectTransform)transform;
         public RectTransform BoardArea => boardArea;
-        public Text TitleText => titleText;
-        public Text ScoreText => scoreText;
-        public Text StatusText => statusText;
+        public TextMeshProUGUI TitleText => titleText;
+        public TextMeshProUGUI ScoreText => scoreText;
+        public TextMeshProUGUI StatusText => statusText;
     }
 }

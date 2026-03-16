@@ -5,7 +5,12 @@ namespace VectorSandboxLab.MemoryGame
 {
     public sealed class SaveSystem
     {
-        private readonly string savePath = Path.Combine(Application.persistentDataPath, "memory-card-save.json");
+        private readonly string savePath;
+
+        public SaveSystem(string path)
+        {
+            savePath = Path.Combine(path, "memory-card-save.json");
+        }
 
         public void Save(GameSaveData saveData)
         {
@@ -30,6 +35,19 @@ namespace VectorSandboxLab.MemoryGame
 
             saveData = JsonUtility.FromJson<GameSaveData>(json);
             return saveData != null;
+        }
+
+        public bool HasSave()
+        {
+            return File.Exists(savePath);
+        }
+
+        public void DeleteSave()
+        {
+            if (File.Exists(savePath))
+            {
+                File.Delete(savePath);
+            }
         }
     }
 }

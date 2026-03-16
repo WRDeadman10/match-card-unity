@@ -69,7 +69,8 @@ namespace VectorSandboxLab.MemoryGame
             for (var index = boardArea.childCount - 1; index >= 0; index--)
             {
                 var child = boardArea.GetChild(index);
-                Object.Destroy(child.gameObject);
+                child.SetParent(null, false);
+                UnityEngine.Object.Destroy(child.gameObject);
             }
 
             activeCards.Clear();
@@ -86,7 +87,7 @@ namespace VectorSandboxLab.MemoryGame
 
             for (var index = 0; index < deck.Count; index++)
             {
-                var cardObject = Object.Instantiate(cardPrefab, boardArea);
+                var cardObject = UnityEngine.Object.Instantiate(cardPrefab, boardArea);
                 cardObject.name = $"Card_{index:00}";
 
                 var cardView = cardObject.GetComponent<CardView>();
@@ -148,7 +149,7 @@ namespace VectorSandboxLab.MemoryGame
         {
             for (var index = definitions.Count - 1; index > 0; index--)
             {
-                var swapIndex = Random.Range(0, index + 1);
+                var swapIndex = UnityEngine.Random.Range(0, index + 1);
                 (definitions[index], definitions[swapIndex]) = (definitions[swapIndex], definitions[index]);
             }
         }
