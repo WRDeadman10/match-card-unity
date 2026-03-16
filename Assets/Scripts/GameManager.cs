@@ -12,6 +12,7 @@ namespace VectorSandboxLab.MemoryGame
         [SerializeField] private BoardLayoutPreset initialLayout = BoardLayoutPreset.FourByFour;
 
         private readonly List<CardView> flippedCards = new(2);
+        private readonly ScoreManager scoreManager = new();
         private BoardManager boardManager;
         private GameLayoutView layoutView;
         private Coroutine resolveRoutine;
@@ -36,7 +37,7 @@ namespace VectorSandboxLab.MemoryGame
 
             if (layoutView.ScoreText != null)
             {
-                layoutView.ScoreText.text = "Score: 0";
+                layoutView.ScoreText.text = $"Score: {scoreManager.Score}";
             }
 
             if (layoutView.StatusText != null)
@@ -97,26 +98,38 @@ namespace VectorSandboxLab.MemoryGame
             {
                 firstCard.SetMatched(true);
                 secondCard.SetMatched(true);
+                var gainedPoints = scoreManager.RegisterMatch();
+                RefreshScore();
 
                 if (layoutView?.StatusText != null)
                 {
-                    layoutView.StatusText.text = $"Match found: {firstCard.Symbol}";
+                    layoutView.StatusText.text = $"Match found: {firstCard.Symbol} (+{gainedPoints})";
                 }
             }
             else
             {
+                var scoreDelta = scoreManager.RegisterMismatch();
+                RefreshScore();
                 yield return new WaitForSeconds(0.5f);
                 firstCard.PlayPlaceholderFlip(false);
                 secondCard.PlayPlaceholderFlip(false);
 
                 if (layoutView?.StatusText != null)
                 {
-                    layoutView.StatusText.text = "Not a match. Try again.";
+                    layoutView.StatusText.text = $"Not a match. {scoreDelta}";
                 }
             }
 
             flippedCards.Clear();
             resolveRoutine = null;
+        }
+
+        private void RefreshScore()
+        {
+            if (layoutView?.ScoreText != null)
+            {
+                layoutView.ScoreText.text = $"Score: {scoreManager.Score}";
+            }
         }
     }
 }
