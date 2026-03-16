@@ -13,6 +13,7 @@ namespace VectorSandboxLab.MemoryGame
 
         private readonly List<CardView> flippedCards = new(2);
         private readonly ScoreManager scoreManager = new();
+        private AudioManager audioManager;
         private BoardManager boardManager;
         private GameLayoutView layoutView;
         private Coroutine resolveRoutine;
@@ -26,6 +27,7 @@ namespace VectorSandboxLab.MemoryGame
             }
 
             EnsureEventSystem();
+            audioManager = new AudioManager(gameObject);
 
             var layoutInstance = Instantiate(gameLayoutPrefab);
             layoutView = layoutInstance.GetComponent<GameLayoutView>();
@@ -69,6 +71,7 @@ namespace VectorSandboxLab.MemoryGame
             }
 
             cardView.PlayPlaceholderFlip(true);
+            audioManager?.PlayFlip();
             flippedCards.Add(cardView);
 
             if (layoutView?.StatusText == null)
@@ -99,6 +102,7 @@ namespace VectorSandboxLab.MemoryGame
                 firstCard.SetMatched(true);
                 secondCard.SetMatched(true);
                 var gainedPoints = scoreManager.RegisterMatch();
+                audioManager?.PlayMatch();
                 RefreshScore();
 
                 if (layoutView?.StatusText != null)
@@ -109,6 +113,7 @@ namespace VectorSandboxLab.MemoryGame
             else
             {
                 var scoreDelta = scoreManager.RegisterMismatch();
+                audioManager?.PlayMismatch();
                 RefreshScore();
                 yield return new WaitForSeconds(0.5f);
                 firstCard.PlayPlaceholderFlip(false);
