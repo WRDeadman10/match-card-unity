@@ -6,6 +6,12 @@ namespace VectorSandboxLab.MemoryGame
 
         public int Score { get; private set; }
 
+        public void Restore(int score)
+        {
+            Score = score;
+            comboStreak = 0;
+        }
+
         public int RegisterMatch()
         {
             var multiplier = comboStreak + 1;

@@ -12,6 +12,7 @@ namespace VectorSandboxLab.MemoryGame
         private readonly List<CardView> activeCards = new();
         private readonly RectOffset padding = new(18, 18, 18, 18);
         private readonly Vector2 spacing = new(16f, 16f);
+        private readonly List<CardDefinition> currentDeck = new();
 
         private GridLayoutGroup gridLayoutGroup;
         private BoardAreaLayoutWatcher layoutWatcher;
@@ -25,13 +26,14 @@ namespace VectorSandboxLab.MemoryGame
         }
 
         public IReadOnlyList<CardView> ActiveCards => activeCards;
+        public IReadOnlyList<CardDefinition> CurrentDeck => currentDeck;
 
-        public void GenerateBoard(BoardLayoutPreset preset, Action<CardView> onCardSelected)
+        public void GenerateBoard(BoardLayoutPreset preset, Action<CardView> onCardSelected, IReadOnlyList<CardDefinition> restoredDeck = null)
         {
             currentLayout = BoardLayoutDefinition.FromPreset(preset);
             EnsureGrid();
             ClearExistingCards();
-            CreateCardViews(onCardSelected);
+            CreateCardViews(onCardSelected, restoredDeck);
             RefreshCellSize();
             isConfigured = true;
         }
@@ -71,11 +73,16 @@ namespace VectorSandboxLab.MemoryGame
             }
 
             activeCards.Clear();
+            currentDeck.Clear();
         }
 
-        private void CreateCardViews(Action<CardView> onCardSelected)
+        private void CreateCardViews(Action<CardView> onCardSelected, IReadOnlyList<CardDefinition> restoredDeck)
         {
-            var deck = BuildDeck(currentLayout);
+            var deck = restoredDeck != null && restoredDeck.Count == currentLayout.CardCount
+                ? new List<CardDefinition>(restoredDeck)
+                : BuildDeck(currentLayout);
+
+            currentDeck.AddRange(deck);
 
             for (var index = 0; index < deck.Count; index++)
             {
@@ -116,17 +123,24 @@ namespace VectorSandboxLab.MemoryGame
 
         private static List<CardDefinition> BuildDeck(BoardLayoutDefinition layout)
         {
-            var definitions = new List<CardDefinition>(layout.CardCount);
+            var pairs = new List<CardDefinition>(layout.CardCount);
             var symbols = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
             for (var pairId = 0; pairId < layout.PairCount; pairId++)
             {
                 var symbol = pairId < symbols.Length ? symbols[pairId].ToString() : $"#{pairId + 1}";
-                definitions.Add(new CardDefinition(definitions.Count, pairId, symbol));
-                definitions.Add(new CardDefinition(definitions.Count, pairId, symbol));
+                pairs.Add(new CardDefinition(0, pairId, symbol));
+                pairs.Add(new CardDefinition(0, pairId, symbol));
             }
 
-            Shuffle(definitions);
+            Shuffle(pairs);
+
+            var definitions = new List<CardDefinition>(pairs.Count);
+            for (var index = 0; index < pairs.Count; index++)
+            {
+                definitions.Add(new CardDefinition(index, pairs[index].PairId, pairs[index].Symbol));
+            }
+
             return definitions;
         }
 
