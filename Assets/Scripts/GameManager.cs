@@ -12,6 +12,7 @@ namespace VectorSandboxLab.MemoryGame
         [SerializeField] private BoardLayoutPreset initialLayout = BoardLayoutPreset.FourByFour;
 
         private readonly List<CardView> flippedCards = new(2);
+        private readonly Queue<CardView> queuedSelections = new();
         private readonly ScoreManager scoreManager = new();
         private readonly SaveSystem saveSystem = new();
         private AudioManager audioManager;
@@ -88,28 +89,18 @@ namespace VectorSandboxLab.MemoryGame
 
         private void OnCardSelected(CardView cardView)
         {
-            if (cardView == null || cardView.IsFaceUp || flippedCards.Count >= 2)
+            if (cardView == null || cardView.IsFaceUp || cardView.IsMatched)
             {
                 return;
             }
 
-            cardView.PlayPlaceholderFlip(true);
-            audioManager?.PlayFlip();
-            flippedCards.Add(cardView);
-
-            if (layoutView?.StatusText == null)
+            if (resolveRoutine != null || flippedCards.Count >= 2)
             {
+                EnqueueSelection(cardView);
                 return;
             }
 
-            layoutView.StatusText.text = flippedCards.Count == 1
-                ? "Pick one more card."
-                : "Checking cards...";
-
-            if (flippedCards.Count == 2)
-            {
-                resolveRoutine = StartCoroutine(ResolveSelection());
-            }
+            SelectCard(cardView);
         }
 
         private IEnumerator ResolveSelection()
@@ -162,6 +153,7 @@ namespace VectorSandboxLab.MemoryGame
             flippedCards.Clear();
             SaveProgress();
             resolveRoutine = null;
+            ProcessQueuedSelections();
         }
 
         private void RefreshScore()
@@ -254,6 +246,65 @@ namespace VectorSandboxLab.MemoryGame
             }
 
             return boardManager.ActiveCards.Count > 0;
+        }
+
+        private void SelectCard(CardView cardView)
+        {
+            cardView.PlayPlaceholderFlip(true);
+            audioManager?.PlayFlip();
+            flippedCards.Add(cardView);
+
+            if (layoutView?.StatusText != null)
+            {
+                layoutView.StatusText.text = flippedCards.Count == 1
+                    ? "Pick one more card."
+                    : "Checking cards...";
+            }
+
+            if (flippedCards.Count == 2)
+            {
+                resolveRoutine = StartCoroutine(ResolveSelection());
+            }
+        }
+
+        private void EnqueueSelection(CardView cardView)
+        {
+            foreach (var queuedCard in queuedSelections)
+            {
+                if (queuedCard == cardView)
+                {
+                    return;
+                }
+            }
+
+            queuedSelections.Enqueue(cardView);
+        }
+
+        private void ProcessQueuedSelections()
+        {
+            while (queuedSelections.Count > 0 && flippedCards.Count < 2 && resolveRoutine == null)
+            {
+                var nextCard = queuedSelections.Dequeue();
+                if (nextCard == null || nextCard.IsFaceUp || nextCard.IsMatched)
+                {
+                    continue;
+                }
+
+                SelectCard(nextCard);
+            }
+        }
+
+        private void OnApplicationPause(bool pauseStatus)
+        {
+            if (pauseStatus)
+            {
+                SaveProgress();
+            }
+        }
+
+        private void OnApplicationQuit()
+        {
+            SaveProgress();
         }
     }
 }

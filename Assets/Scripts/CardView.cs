@@ -70,6 +70,13 @@ namespace VectorSandboxLab.MemoryGame
         {
             IsMatched = value;
             SetInteractable(!value);
+
+            if (backgroundImage != null)
+            {
+                backgroundImage.color = value
+                    ? new Color(0.31f, 0.55f, 0.39f, 1f)
+                    : new Color(0.15f, 0.19f, 0.26f, 1f);
+            }
         }
 
         public void ShowFaceImmediate(bool showFront)
