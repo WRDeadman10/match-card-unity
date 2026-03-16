@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -25,12 +26,12 @@ namespace VectorSandboxLab.MemoryGame
 
         public IReadOnlyList<CardView> ActiveCards => activeCards;
 
-        public void GenerateBoard(BoardLayoutPreset preset)
+        public void GenerateBoard(BoardLayoutPreset preset, Action<CardView> onCardSelected)
         {
             currentLayout = BoardLayoutDefinition.FromPreset(preset);
             EnsureGrid();
             ClearExistingCards();
-            CreateCardViews();
+            CreateCardViews(onCardSelected);
             RefreshCellSize();
             isConfigured = true;
         }
@@ -72,7 +73,7 @@ namespace VectorSandboxLab.MemoryGame
             activeCards.Clear();
         }
 
-        private void CreateCardViews()
+        private void CreateCardViews(Action<CardView> onCardSelected)
         {
             var deck = BuildDeck(currentLayout);
 
@@ -82,9 +83,8 @@ namespace VectorSandboxLab.MemoryGame
                 cardObject.name = $"Card_{index:00}";
 
                 var cardView = cardObject.GetComponent<CardView>();
-                cardView.SetFrontLabel(deck[index].Symbol);
-                cardView.SetBackLabel("?");
-                cardView.SetInteractable(false);
+                cardView.Initialize(deck[index], () => onCardSelected?.Invoke(cardView));
+                cardView.SetInteractable(true);
                 cardView.ShowFaceImmediate(false);
 
                 activeCards.Add(cardView);

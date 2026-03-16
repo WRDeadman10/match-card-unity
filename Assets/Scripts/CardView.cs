@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace VectorSandboxLab.MemoryGame
@@ -17,9 +18,28 @@ namespace VectorSandboxLab.MemoryGame
 
         private Coroutine flipRoutine;
 
+        public int Index { get; private set; }
+        public int PairId { get; private set; }
+        public string Symbol { get; private set; }
         public bool IsFaceUp { get; private set; }
 
         public Button Button => button;
+
+        public void Initialize(CardDefinition definition, UnityAction onSelected)
+        {
+            Index = definition.Index;
+            PairId = definition.PairId;
+            Symbol = definition.Symbol;
+
+            SetFrontLabel(definition.Symbol);
+            SetBackLabel("?");
+
+            if (button != null)
+            {
+                button.onClick.RemoveAllListeners();
+                button.onClick.AddListener(onSelected);
+            }
+        }
 
         public void SetFrontLabel(string label)
         {
