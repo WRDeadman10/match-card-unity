@@ -22,6 +22,7 @@ namespace VectorSandboxLab.MemoryGame
         public int PairId { get; private set; }
         public string Symbol { get; private set; }
         public bool IsFaceUp { get; private set; }
+        public bool IsMatched { get; private set; }
 
         public Button Button => button;
 
@@ -63,6 +64,12 @@ namespace VectorSandboxLab.MemoryGame
             {
                 button.interactable = value;
             }
+        }
+
+        public void SetMatched(bool value)
+        {
+            IsMatched = value;
+            SetInteractable(!value);
         }
 
         public void ShowFaceImmediate(bool showFront)
